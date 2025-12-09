@@ -1,4 +1,5 @@
 use crate::action::Action;
+use anyhow::Result;
 use global_hotkey::hotkey::HotKey;
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager};
 use std::collections::HashMap;
@@ -39,10 +40,9 @@ impl HotkeyManager {
         }
     }
 
-    pub fn register_hotkey<T: Action + 'static>(&self, hotkey: HotKey, action: T) {
-        self._global_manager.register(hotkey).unwrap();
-        self.action_sender
-            .send((hotkey.id(), Box::new(action)))
-            .unwrap();
+    pub fn register_hotkey<T: Action + 'static>(&self, hotkey: HotKey, action: T) -> Result<()> {
+        self._global_manager.register(hotkey)?;
+        self.action_sender.send((hotkey.id(), Box::new(action)))?;
+        Ok(())
     }
 }

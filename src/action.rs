@@ -1,7 +1,7 @@
 use crate::app::App;
 use crate::open::Open;
 
-pub trait Action: Send {
+pub trait Action: Send + Sync {
     fn execute(&self);
 }
 
