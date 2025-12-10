@@ -32,7 +32,7 @@ impl eframe::App for GroupCtrl {
             if ui.add(button).clicked() {
                 let hotkey = HotKey::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyF);
                 let action = OpenApp(App::new("com.apple.finder"));
-                self.error = self.hotkey_manager.register_hotkey(hotkey, action).err()
+                self.error = self.hotkey_manager.bind_hotkey(hotkey, action).err()
             }
             if let Some(error) = &self.error {
                 ui.colored_label(egui::Color32::RED, format!("Error: {}", error));
