@@ -1,5 +1,6 @@
 use crate::app::App;
 use crate::open::Open;
+use anyhow::Result;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -8,10 +9,11 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn execute(&self) {
+    pub fn execute(&self) -> Result<()> {
         match self {
-            Action::OpenApp(app) => app.open().unwrap(), // TODO error handling
-        }
+            Action::OpenApp(app) => app.open()?,
+        };
+        Ok(())
     }
 }
 

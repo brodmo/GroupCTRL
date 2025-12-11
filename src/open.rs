@@ -1,5 +1,6 @@
 use crate::app::App;
 use anyhow::{Result, bail};
+use log::info;
 use objc2_app_kit::NSWorkspace;
 use objc2_foundation::NSString;
 
@@ -9,7 +10,7 @@ pub trait Open {
 
 impl Open for App {
     fn open(&self) -> Result<()> {
-        println!("opening '{self}'");
+        info!("Opening app {self}");
         let workspace = NSWorkspace::sharedWorkspace();
         let bundle_id = NSString::from_str(self.bundle_id.as_str());
         let Some(app_url) = workspace.URLForApplicationWithBundleIdentifier(&bundle_id) else {

@@ -4,6 +4,7 @@ use bimap::BiMap;
 use crossbeam::channel;
 use global_hotkey::hotkey::HotKey;
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager};
+use log::{error, info};
 use std::collections::HashMap;
 use std::thread;
 
@@ -28,7 +29,10 @@ pub fn listen_for_hotkeys(binding_receiver: channel::Receiver<HotkeyBinding>) {
                     && event.state == global_hotkey::HotKeyState::Pressed
                     && let Some(action) = hotkey_actions.get(&event.id)
                 {
-                    action.execute()
+                    let result = action.execute();
+                    if let Err(error) = result {
+                        error!("{error}");
+                    }
                 }
             }
         }
@@ -65,10 +69,12 @@ impl HotkeyManager {
 
     /// Returns existing bind if hotkey is already in use
     pub fn bind_hotkey(&mut self, hotkey: HotKey, action: Action) -> Result<Option<Action>> {
+        info!("Binding {hotkey} to '{action}'");
         if let Some(previous_action) = self.bindings.get_by_left(&hotkey) {
             if *previous_action == action {
                 return Ok(None); // equivalent to registration
             }
+            info!("Hotkey is already assigned to {previous_action}");
             return Ok(Some(previous_action.clone()));
         }
         if let Some(previous_hotkey) = self.bindings.get_by_right(&action) {
