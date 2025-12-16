@@ -9,7 +9,6 @@ use anyhow::Result;
 use iced::Element;
 use simplelog::*;
 use std::fs;
-use std::fs::File;
 
 #[derive(Default)]
 struct GroupCtrl {
@@ -25,9 +24,9 @@ enum Message {
 impl GroupCtrl {
     fn update(&mut self, message: Message) {
         match message {
-            Message::Picker(picker_msg) => {
+            Message::Picker(picker_message) => {
                 self.hotkey_picker
-                    .update(picker_msg, &mut self.hotkey_manager);
+                    .update(picker_message, &mut self.hotkey_manager);
             }
         }
     }
@@ -43,7 +42,7 @@ impl GroupCtrl {
 
 fn setup_logging() -> Result<()> {
     fs::create_dir_all("logs")?;
-    let log_file = File::create("logs/app.log")?;
+    let log_file = fs::File::create("logs/app.log")?;
     let config = ConfigBuilder::new().build();
     CombinedLogger::init(vec![
         TermLogger::new(
@@ -59,6 +58,13 @@ fn setup_logging() -> Result<()> {
 
 fn main() -> iced::Result {
     setup_logging().expect("Logging setup failed");
+
+    // Make panics crash loudly during development
+    std::panic::set_hook(Box::new(|panic_info| {
+        eprintln!("PANIC: {}", panic_info);
+        std::process::exit(1);
+    }));
+
     iced::application(GroupCtrl::default, GroupCtrl::update, GroupCtrl::view)
         .subscription(GroupCtrl::subscription)
         .run()
