@@ -4,69 +4,48 @@ mod hotkeys;
 mod open;
 mod util;
 
-use crate::action::Action;
+use crate::action::Action::OpenApp;
 use crate::app::App;
+use crate::hotkeys::{Hotkey, HotkeyManager};
 use anyhow::Result;
-use eframe::egui;
-use eframe::egui::Button;
 use global_hotkey::hotkey::{Code, Modifiers};
+use iced::widget::{Button, button};
+use simplelog::*;
 use std::fs;
 use std::fs::File;
 
-use crate::hotkeys::{Hotkey, HotkeyManager};
-use simplelog::*;
-
 struct GroupCtrl {
     hotkey_manager: HotkeyManager,
-    error: Option<String>,
+}
+
+#[derive(Clone)]
+enum Message {
+    RegisterHotkey,
+}
+
+impl Default for GroupCtrl {
+    fn default() -> Self {
+        Self {
+            hotkey_manager: HotkeyManager::new().unwrap(),
+        }
+    }
 }
 
 impl GroupCtrl {
-    fn new() -> Self {
-        Self {
-            hotkey_manager: HotkeyManager::new().unwrap(),
-            error: None,
-        }
-    }
-
-    fn handle_register_click(&mut self, hotkey: Hotkey, app: App) {
-        let result = self
-            .hotkey_manager
-            .bind_hotkey(hotkey, Action::OpenApp(app));
-        match result {
-            Err(err) => {
-                self.error = Some(err.to_string());
-            }
-            Ok(action_option) => {
-                // this is pointless atm, for future use
-                self.error = None;
-                if let Some(action) = action_option {
-                    // TODO popup
-                    let msg = format!("Hotkey already in use for '{}'", action);
-                    self.error = Some(msg);
-                }
+    fn update(&mut self, message: Message) {
+        match message {
+            Message::RegisterHotkey => {
+                let app = App::new("com.apple.finder");
+                let hotkey = Hotkey::new(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyF);
+                self.hotkey_manager
+                    .bind_hotkey(hotkey, OpenApp(app))
+                    .unwrap();
             }
         }
     }
-}
 
-impl eframe::App for GroupCtrl {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            let app = App::new("com.apple.finder");
-            let hotkey = Hotkey::new(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyF);
-            ui.horizontal(|ui| {
-                ui.label(app.to_string());
-                ui.label(hotkey.to_string())
-            });
-            let button = Button::new("Register hotkey");
-            if ui.add(button).clicked() {
-                self.handle_register_click(hotkey, app);
-            }
-            if let Some(error) = &self.error {
-                ui.colored_label(egui::Color32::RED, format!("Error: {}", error));
-            }
-        });
+    fn view(&self) -> Button<'_, Message> {
+        button("Register Hotkey").on_press(Message::RegisterHotkey)
     }
 }
 
@@ -86,11 +65,7 @@ fn setup_logging() -> Result<()> {
     Ok(())
 }
 
-fn main() -> eframe::Result<()> {
+fn main() -> iced::Result {
     setup_logging().expect("Logging setup failed");
-    eframe::run_native(
-        "GroupCtrl",
-        eframe::NativeOptions::default(),
-        Box::new(|_| Ok(Box::new(GroupCtrl::new()))),
-    )
+    iced::run(GroupCtrl::update, GroupCtrl::view)
 }
