@@ -18,7 +18,7 @@ pub struct HotkeyPicker {
 #[derive(Clone, Debug)]
 pub enum Message {
     StartRecording,
-    KeyPress(Hotkey),
+    KeyRecorded(Hotkey),
 }
 
 impl HotkeyPicker {
@@ -28,7 +28,7 @@ impl HotkeyPicker {
                 self.recording = true;
                 self.error = hotkey_manager.pause_hotkeys().err();
             }
-            Message::KeyPress(hotkey) => {
+            Message::KeyRecorded(hotkey) => {
                 if self.recording {
                     self.recording = false;
                     self.error = hotkey_manager.unpause_hotkeys().err();
@@ -64,7 +64,7 @@ impl HotkeyPicker {
                 modifiers,
                 physical_key,
                 ..
-            } => convert_hotkey(modifiers, physical_key).map(Message::KeyPress),
+            } => convert_hotkey(modifiers, physical_key).map(Message::KeyRecorded),
             _ => None,
         })
     }
