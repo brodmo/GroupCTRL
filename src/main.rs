@@ -4,7 +4,6 @@ mod os;
 mod util;
 
 use crate::hotkeys::{HotkeyManager, HotkeyPicker, PickerMessage};
-use anyhow::Result;
 use iced::Element;
 use simplelog::*;
 use std::fs;
@@ -39,7 +38,7 @@ impl GroupCtrl {
     }
 }
 
-fn setup_logging() -> Result<()> {
+fn setup_logging() -> anyhow::Result<()> {
     fs::create_dir_all("logs")?;
     let log_file = fs::File::create("logs/app.log")?;
     let config = ConfigBuilder::new().build();

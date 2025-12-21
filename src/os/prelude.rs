@@ -1,4 +1,3 @@
-use anyhow::Result;
 use global_hotkey::hotkey::Modifiers;
 
 pub trait FormatTrait {
@@ -12,5 +11,5 @@ pub trait AppTrait {
 }
 
 pub trait Openable {
-    fn open(&self) -> Result<()>;
+    fn open(&self) -> anyhow::Result<()>;
 }

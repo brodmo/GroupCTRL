@@ -1,6 +1,5 @@
 use super::model::Hotkey;
 use crate::action::Action;
-use anyhow::Result;
 use bimap::BiMap;
 use crossbeam::channel;
 use global_hotkey::hotkey::HotKey as GlobalHotkey;
@@ -61,7 +60,7 @@ impl Default for HotkeyManager {
 
 impl HotkeyManager {
     #[cfg(test)]
-    fn new_with_sender(sender: channel::Sender<HotkeyBinding>) -> Result<Self> {
+    fn new_with_sender(sender: channel::Sender<HotkeyBinding>) -> anyhow::Result<Self> {
         let global_manager = GlobalHotKeyManager::new()?;
         Ok(Self {
             bindings: BiMap::new(),
@@ -71,7 +70,11 @@ impl HotkeyManager {
     }
 
     /// Returns existing bind if hotkey is already in use
-    pub fn bind_hotkey(&mut self, hotkey: Hotkey, action: Action) -> Result<Option<Action>> {
+    pub fn bind_hotkey(
+        &mut self,
+        hotkey: Hotkey,
+        action: Action,
+    ) -> anyhow::Result<Option<Action>> {
         info!("Binding {hotkey} to '{action}'");
         if let Some(previous_action) = self.bindings.get_by_left(&hotkey) {
             if *previous_action == action {
@@ -94,12 +97,12 @@ impl HotkeyManager {
         self.bindings.left_values().map(|h| h.0).collect()
     }
 
-    pub fn pause_hotkeys(&self) -> Result<()> {
+    pub fn pause_hotkeys(&self) -> anyhow::Result<()> {
         self.global_manager.unregister_all(&self.hotkeys())?;
         Ok(())
     }
 
-    pub fn unpause_hotkeys(&self) -> Result<()> {
+    pub fn unpause_hotkeys(&self) -> anyhow::Result<()> {
         self.global_manager.register_all(&self.hotkeys())?;
         Ok(())
     }

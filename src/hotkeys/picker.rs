@@ -3,7 +3,6 @@ use crate::hotkeys::convert::convert_hotkey;
 use crate::hotkeys::{Hotkey, HotkeyManager};
 use crate::os::App;
 use crate::os::prelude::*;
-use anyhow::Error;
 use global_hotkey::hotkey::Code;
 use iced::keyboard::Event;
 use iced::widget::{Button, button, text};
@@ -13,7 +12,7 @@ use iced::{color, keyboard};
 pub struct HotkeyPicker {
     recording: bool,
     picked: Option<Hotkey>,
-    error: Option<Error>,
+    error: Option<anyhow::Error>,
 }
 
 #[derive(Clone, Debug)]

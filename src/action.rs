@@ -1,6 +1,5 @@
 use crate::os::App;
 use crate::os::prelude::*;
-use anyhow::Result;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -9,7 +8,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn execute(&self) -> Result<()> {
+    pub fn execute(&self) -> anyhow::Result<()> {
         match self {
             Action::OpenApp(app) => app.open()?,
         };
