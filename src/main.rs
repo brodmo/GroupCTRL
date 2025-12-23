@@ -5,34 +5,57 @@ mod util;
 
 use std::fs;
 
-use iced::Element;
+use iced::widget::{button, row, text};
+use iced::{Element, Task};
 use simplelog::*;
 
 use crate::hotkeys::{HotkeyManager, HotkeyPicker, PickerMessage};
+use crate::os::prelude::AppPickerTrait;
+use crate::os::{App, AppPicker};
 
 #[derive(Default)]
 struct GroupCtrl {
     hotkey_manager: HotkeyManager,
     hotkey_picker: HotkeyPicker,
+    selected_app: Option<App>,
 }
 
 #[derive(Clone, Debug)]
 enum Message {
     Picker(PickerMessage),
+    AppPicked(Option<App>),
+    PickApp,
 }
 
 impl GroupCtrl {
-    fn update(&mut self, message: Message) {
+    fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::Picker(picker_message) => {
                 self.hotkey_picker
                     .update(picker_message, &mut self.hotkey_manager);
+                Task::none()
+            }
+            Message::PickApp => Task::perform(AppPicker::pick_app(), |result| {
+                Message::AppPicked(result.ok().flatten()) // Discard error
+            }),
+            Message::AppPicked(app_option) => {
+                self.selected_app = app_option;
+                Task::none()
             }
         }
     }
 
     fn view(&self) -> Element<'_, Message> {
-        Element::from(self.hotkey_picker.view()).map(Message::Picker)
+        row![
+            Element::from(self.hotkey_picker.view()).map(Message::Picker),
+            if let Some(app) = &self.selected_app {
+                text(&app.bundle_id)
+            } else {
+                text("No app selected")
+            },
+            button("Pick App").on_press(Message::PickApp)
+        ]
+        .into()
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
