@@ -1,7 +1,4 @@
-mod win32 {
-    pub use windows::Win32::Foundation::{BOOL, HWND, LPARAM};
-    pub use windows::Win32::UI::WindowsAndMessaging::*;
-}
+use super::api as win32;
 use super::pid_to_exe::pid_to_exe;
 
 fn is_main_window(window: win32::HWND) -> bool {
@@ -21,7 +18,7 @@ pub fn collect_main_windows() -> windows::core::Result<Vec<win32::HWND>> {
     extern "system" fn collect_window_callback(
         window: win32::HWND,
         lparam: win32::LPARAM,
-    ) -> win32::BOOL {
+    ) -> windows::core::BOOL {
         unsafe {
             let windows = &mut *(lparam.0 as *mut Vec<win32::HWND>);
             windows.push(window);
@@ -34,7 +31,7 @@ pub fn collect_main_windows() -> windows::core::Result<Vec<win32::HWND>> {
     unsafe {
         win32::EnumWindows(Some(collect_window_callback), lparam)?;
     }
-    windows.retain(|&hwnd| is_main_window(hwnd));
+    windows.retain(|&window| is_main_window(window));
     Ok(windows)
 }
 

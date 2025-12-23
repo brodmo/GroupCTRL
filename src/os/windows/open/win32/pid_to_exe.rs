@@ -1,12 +1,10 @@
-mod win32 {
-    pub use windows::Win32::Foundation::CloseHandle;
-    pub use windows::Win32::System::Threading::*;
-}
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 use std::sync::{LazyLock, Mutex};
+
+use super::api as win32;
 
 static EXE_CACHE: LazyLock<Mutex<HashMap<u32, String>>> = LazyLock::new(Default::default);
 
