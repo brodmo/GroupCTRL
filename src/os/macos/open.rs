@@ -10,7 +10,7 @@ impl Openable for App {
     fn open(&self) -> anyhow::Result<()> {
         info!("Opening app {self}");
         let workspace = NSWorkspace::sharedWorkspace();
-        let bundle_id = NSString::from_str(self.bundle_id.as_str());
+        let bundle_id = NSString::from_str(&self.bundle_id);
         let Some(app_url) = workspace.URLForApplicationWithBundleIdentifier(&bundle_id) else {
             bail!("Could not find app with bundle id '{bundle_id}'");
         };

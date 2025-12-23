@@ -15,16 +15,8 @@ impl AppTrait for App {
         }
     }
 
-    fn id(&self) -> &str {
-        self.bundle_id.as_str()
-    }
-
     fn display(&self) -> String {
-        let name = self
-            .bundle_id
-            .split(".")
-            .last()
-            .unwrap_or(self.bundle_id.as_str());
+        let name = self.bundle_id.split(".").last().unwrap_or(&self.bundle_id);
         capitalize(name)
     }
 }

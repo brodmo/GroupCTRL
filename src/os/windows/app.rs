@@ -9,10 +9,6 @@ pub struct App {
 }
 
 impl AppTrait for App {
-    fn id(&self) -> &str {
-        self.exe_path.as_str()
-    }
-
     fn new(exe_path: &str) -> Self {
         Self {
             exe_path: exe_path.to_string(),
@@ -20,11 +16,7 @@ impl AppTrait for App {
     }
 
     fn display(&self) -> String {
-        let exe_name = self
-            .exe_path
-            .split("\\")
-            .last()
-            .unwrap_or(self.exe_path.as_str());
+        let exe_name = self.exe_path.split("\\").last().unwrap_or(&self.exe_path);
         let name = exe_name.strip_suffix(".exe").unwrap_or(exe_name);
         capitalize(name)
     }

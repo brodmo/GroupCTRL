@@ -37,7 +37,7 @@ fn convert_key(key: Physical) -> Option<Code> {
         {
             return None;
         }
-        Code::from_str(key_str.as_str()).ok()
+        Code::from_str(&key_str).ok()
     } else {
         None
     }
