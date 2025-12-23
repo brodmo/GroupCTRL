@@ -1,5 +1,6 @@
-use crate::os::prelude::FormatTrait;
 use global_hotkey::hotkey::Modifiers;
+
+use crate::os::prelude::FormatTrait;
 
 pub struct Format;
 

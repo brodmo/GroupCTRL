@@ -1,6 +1,7 @@
+use std::fmt::{Display, Formatter};
+
 use crate::os::App;
 use crate::os::prelude::*;
-use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum Action {

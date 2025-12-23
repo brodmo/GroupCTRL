@@ -3,10 +3,12 @@ mod hotkeys;
 mod os;
 mod util;
 
-use crate::hotkeys::{HotkeyManager, HotkeyPicker, PickerMessage};
+use std::fs;
+
 use iced::Element;
 use simplelog::*;
-use std::fs;
+
+use crate::hotkeys::{HotkeyManager, HotkeyPicker, PickerMessage};
 
 #[derive(Default)]
 struct GroupCtrl {

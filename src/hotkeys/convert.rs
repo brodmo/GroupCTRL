@@ -1,8 +1,10 @@
-use super::Hotkey;
+use std::str::FromStr;
+
 use global_hotkey::hotkey::{Code, Modifiers};
 use iced::keyboard::Modifiers as IcedModifiers;
 use iced::keyboard::key::Physical;
-use std::str::FromStr;
+
+use super::Hotkey;
 
 pub fn convert_hotkey(modifiers: IcedModifiers, key: Physical) -> Option<Hotkey> {
     Some(Hotkey::new(convert_modifiers(modifiers), convert_key(key)?))

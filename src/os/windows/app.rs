@@ -1,6 +1,7 @@
+use std::fmt::{Display, Formatter};
+
 use crate::os::prelude::AppTrait;
 use crate::util::capitalize;
-use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct App {

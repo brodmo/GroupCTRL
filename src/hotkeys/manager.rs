@@ -1,12 +1,14 @@
-use super::model::Hotkey;
-use crate::action::Action;
+use std::collections::HashMap;
+use std::thread;
+
 use bimap::BiMap;
 use crossbeam::channel;
 use global_hotkey::hotkey::HotKey as GlobalHotkey;
 use global_hotkey::{GlobalHotKeyEvent, GlobalHotKeyManager};
 use log::{error, info};
-use std::collections::HashMap;
-use std::thread;
+
+use super::model::Hotkey;
+use crate::action::Action;
 
 // We need to store u32 because that's all we get from the keypress event
 pub type HotkeyBinding = (u32, Option<Action>);
@@ -110,11 +112,12 @@ impl HotkeyManager {
 
 #[cfg(test)]
 mod tests {
+    use global_hotkey::hotkey::{Code, Modifiers};
+    use serial_test::serial;
+
     use super::*;
     use crate::os::App;
     use crate::os::prelude::*;
-    use global_hotkey::hotkey::{Code, Modifiers};
-    use serial_test::serial;
 
     #[test]
     #[serial]

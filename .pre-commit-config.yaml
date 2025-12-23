@@ -11,7 +11,7 @@ repos:
       - id: cargo-fmt
         name: cargo fmt
         language: system
-        entry: cargo fmt --
+        entry: cargo +nightly fmt --
         types: [ rust ]
 
       - id: cargo-clippy

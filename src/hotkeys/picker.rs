@@ -1,12 +1,13 @@
+use global_hotkey::hotkey::Code;
+use iced::keyboard::Event;
+use iced::widget::{Button, button, text};
+use iced::{color, keyboard};
+
 use super::convert::convert_hotkey;
 use super::{Hotkey, HotkeyManager};
 use crate::action::Action::OpenApp;
 use crate::os::App;
 use crate::os::prelude::*;
-use global_hotkey::hotkey::Code;
-use iced::keyboard::Event;
-use iced::widget::{Button, button, text};
-use iced::{color, keyboard};
 
 #[derive(Default)]
 pub struct HotkeyPicker {
