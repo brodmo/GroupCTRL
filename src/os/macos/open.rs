@@ -1,3 +1,8 @@
+use anyhow::bail;
+use log::info;
+use objc2_app_kit::NSWorkspace;
+use objc2_foundation::NSString;
+
 use super::app::App;
 use crate::os::prelude::Openable;
 
@@ -11,9 +16,7 @@ impl Openable for App {
         };
         // TODO use openApplicationAtUrl (requires async)
         if !workspace.openURL(&app_url) {
-            let default_path = NSString::from_str("<no path found>");
-            let app_path = app_url.path().unwrap_or(default_path).to_string();
-            bail!("System refused to open app at path '{app_path}'");
+            bail!("syscall 'openURL' failed");
         }
         Ok(())
     }
@@ -22,6 +25,7 @@ impl Openable for App {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::os::prelude::*;
 
     fn get_current_app() -> App {
         let workspace = NSWorkspace::sharedWorkspace();

@@ -41,7 +41,7 @@ impl HotkeyPicker {
                         return;
                     }
                     self.picked = Some(hotkey);
-                    let action = OpenApp(App::new("C:\\windows\\explorer.exe"));
+                    let action = OpenApp(App::new("com.apple.finder"));
                     self.error = hotkey_manager.bind_hotkey(hotkey, action).err();
                 }
             }

@@ -5,7 +5,7 @@ use crate::util::capitalize;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct App {
-    bundle_id: String,
+    pub bundle_id: String,
 }
 
 impl AppTrait for App {
