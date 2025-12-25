@@ -35,6 +35,12 @@ fn main() {
     }));
 
     dioxus::LaunchBuilder::desktop()
-        .with_cfg(Config::new().with_window(WindowBuilder::new().with_always_on_top(false)))
+        .with_cfg(
+            Config::new().with_window(
+                WindowBuilder::new()
+                    .with_title("GroupCtrl")
+                    .with_always_on_top(false),
+            ),
+        )
         .launch(Root);
 }
