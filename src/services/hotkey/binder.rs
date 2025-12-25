@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use dioxus::desktop::{ShortcutHandle, window};
 use global_hotkey::HotKeyState::Pressed;
 
-use super::record_registered::RecordRegistered;
+use super::callback::SharedHotkeyCallback;
 use crate::models::{Action, Hotkey};
 
 pub trait HotkeyBinder {
@@ -13,12 +13,12 @@ pub trait HotkeyBinder {
 }
 
 pub struct DioxusBinder {
-    record_registered: RecordRegistered,
+    record_registered: SharedHotkeyCallback,
     handles: HashMap<Hotkey, ShortcutHandle>,
 }
 
 impl DioxusBinder {
-    pub(super) fn new(record_registered: RecordRegistered) -> Self {
+    pub(super) fn new(record_registered: SharedHotkeyCallback) -> Self {
         Self {
             record_registered,
             handles: HashMap::new(),

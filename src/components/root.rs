@@ -4,13 +4,13 @@ use super::app_selector::AppSelector;
 use super::hotkey_picker::HotkeyPicker;
 use crate::models::{Action, Hotkey};
 use crate::os::App;
-use crate::services::{HotkeyService, RecordRegistered};
+use crate::services::{HotkeyService, SharedHotkeyCallback};
 
 #[component]
 pub fn Root() -> Element {
-    let record_registered = use_hook(RecordRegistered::default);
+    let record_registered = use_hook(SharedHotkeyCallback::default);
     let mut hotkey_service = use_signal(|| HotkeyService::new(record_registered.clone()));
-    use_context_provider(|| record_registered.clone());
+    use_context_provider(|| record_registered);
     use_context_provider(|| hotkey_service);
 
     let picked_hotkey = use_signal(|| None::<Hotkey>);

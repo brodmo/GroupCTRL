@@ -1,3 +1,3 @@
 mod hotkey;
 
-pub use hotkey::{HotkeyService, RecordRegistered, RecordRegisteredFn};
+pub use hotkey::{HotkeyCallback, HotkeyService, SharedHotkeyCallback};

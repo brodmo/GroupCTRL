@@ -2,7 +2,7 @@ use bimap::BiMap;
 use log::info;
 
 use super::binder::{DioxusBinder, HotkeyBinder};
-use super::record_registered::RecordRegistered;
+use super::callback::SharedHotkeyCallback;
 use crate::models::{Action, Hotkey};
 
 pub struct HotkeyService<B: HotkeyBinder = DioxusBinder> {
@@ -11,7 +11,7 @@ pub struct HotkeyService<B: HotkeyBinder = DioxusBinder> {
 }
 
 impl HotkeyService {
-    pub fn new(record_registered: RecordRegistered) -> Self {
+    pub fn new(record_registered: SharedHotkeyCallback) -> Self {
         Self {
             bindings: BiMap::new(),
             binder: DioxusBinder::new(record_registered),
@@ -50,9 +50,9 @@ mod tests {
     use global_hotkey::hotkey::{Code, Modifiers};
     use serial_test::serial;
 
+    use super::super::binder::tests::MockBinder;
+    use super::super::binder::tests::MockEvent::*;
     use super::*;
-    use crate::services::hotkey::binder::tests::MockBinder;
-    use crate::services::hotkey::binder::tests::MockEvent::*;
 
     impl HotkeyService<MockBinder> {
         fn new_mock(binder: MockBinder) -> Self {
