@@ -1,13 +1,13 @@
 use dioxus::prelude::*;
 
-use crate::os::prelude::AppPickerTrait;
-use crate::os::{App, AppPicker};
+use crate::os::prelude::AppSelection;
+use crate::os::{App, AppDialog};
 
 #[component]
 pub fn AppSelector(mut selected_app: Signal<Option<App>>) -> Element {
     let pick_app = move |_| {
         spawn(async move {
-            if let Ok(Some(app)) = AppPicker::pick_app().await {
+            if let Ok(Some(app)) = AppDialog::select_app().await {
                 selected_app.set(Some(app));
             }
         });

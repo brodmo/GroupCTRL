@@ -8,8 +8,8 @@ pub struct App {
     pub exe_path: String,
 }
 
-impl AppTrait for App {
-    fn new(exe_path: &str) -> Self {
+impl App {
+    pub fn new(exe_path: &str) -> Self {
         Self {
             exe_path: exe_path.to_string(),
         }

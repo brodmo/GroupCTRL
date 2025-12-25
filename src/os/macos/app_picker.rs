@@ -4,12 +4,12 @@ use std::path::Path;
 use anyhow::Context;
 
 use crate::os::App;
-use crate::os::prelude::{AppPickerTrait, AppTrait};
+use crate::os::prelude::AppSelection;
 
-pub struct AppPicker;
+pub struct AppDialog;
 
-impl AppPickerTrait for AppPicker {
-    async fn pick_app() -> anyhow::Result<Option<App>> {
+impl AppSelection for AppDialog {
+    async fn select_app() -> anyhow::Result<Option<App>> {
         let Some(app_path) = rfd::AsyncFileDialog::new()
             .add_filter("Applications", &["app"])
             .set_directory("/Applications")
