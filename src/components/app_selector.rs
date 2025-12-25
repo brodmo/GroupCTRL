@@ -4,7 +4,7 @@ use crate::os::{App, AppDialog, AppSelection};
 
 #[component]
 pub(super) fn AppSelector(mut selected_app: Signal<Option<App>>) -> Element {
-    let pick_app = move |_| {
+    let select_app = move |_| {
         spawn(async move {
             if let Ok(Some(app)) = AppDialog::select_app().await {
                 selected_app.set(Some(app));
@@ -20,12 +20,12 @@ pub(super) fn AppSelector(mut selected_app: Signal<Option<App>>) -> Element {
     rsx! {
         div {
             class: "flex gap-2 items-center",
-            span { "{app_display}" }
             button {
                 class: "btn btn-primary",
-                onclick: pick_app,
+                onclick: select_app,
                 "Pick App"
             }
+            span { "{app_display}" }
         }
     }
 }
