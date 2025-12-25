@@ -1,18 +1,16 @@
-use std::sync::{Arc, Mutex};
-
 use dioxus::prelude::*;
 
 use super::app_selector::AppSelector;
 use super::hotkey_picker::HotkeyPicker;
 use crate::models::{Action, Hotkey};
 use crate::os::App;
-use crate::services::HotkeyService;
+use crate::services::{HotkeyService, RecordRegistered};
 
 #[component]
 pub fn Root() -> Element {
-    let recording_callback = use_hook(|| Arc::new(Mutex::new(None)));
-    let mut hotkey_service = use_signal(|| HotkeyService::new(recording_callback.clone()));
-    use_context_provider(|| recording_callback.clone());
+    let record_registered = use_hook(RecordRegistered::new);
+    let mut hotkey_service = use_signal(|| HotkeyService::new(record_registered.clone()));
+    use_context_provider(|| record_registered.clone());
     use_context_provider(|| hotkey_service);
 
     let picked_hotkey = use_signal(|| None::<Hotkey>);

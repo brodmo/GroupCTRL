@@ -1,7 +1,8 @@
 use bimap::BiMap;
 use log::info;
 
-use super::binder::{DioxusBinder, HotkeyBinder, RecordingCallback};
+use super::binder::{DioxusBinder, HotkeyBinder};
+use super::record_registered::RecordRegistered;
 use crate::models::{Action, Hotkey};
 
 pub struct HotkeyService<B: HotkeyBinder = DioxusBinder> {
@@ -10,10 +11,10 @@ pub struct HotkeyService<B: HotkeyBinder = DioxusBinder> {
 }
 
 impl HotkeyService<DioxusBinder> {
-    pub fn new(recording_callback: RecordingCallback) -> Self {
+    pub fn new(record_registered: RecordRegistered) -> Self {
         Self {
             bindings: BiMap::new(),
-            binder: DioxusBinder::new(recording_callback),
+            binder: DioxusBinder::new(record_registered),
         }
     }
 }

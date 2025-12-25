@@ -1,5 +1,6 @@
 mod binder;
+mod record_registered;
 mod service;
 
-pub use binder::RecordingCallback;
+pub use record_registered::{RecordRegistered, RecordRegisteredFn};
 pub use service::HotkeyService;

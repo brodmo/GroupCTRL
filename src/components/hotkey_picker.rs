@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use futures_util::stream::StreamExt;
 
 use crate::models::Hotkey;
-use crate::services::RecordingCallback;
+use crate::services::{RecordRegistered, RecordRegisteredFn};
 
 fn is_modifier(code: &Code) -> bool {
     let code_str = code.to_string();
@@ -35,9 +35,9 @@ pub fn HotkeyPicker(mut picked_hotkey: Signal<Option<Hotkey>>) -> Element {
         })
     };
 
-    let recording_callback = use_context::<RecordingCallback>();
-
-    // Coroutine to receive captured hotkeys
+    // Need this to handle hotkeys that are already globally registered
+    // Nice side effect: Collisions can only occur in this scenario
+    let record_registered = use_context::<RecordRegistered>();
     let hotkey_coroutine = use_coroutine(move |mut rx: UnboundedReceiver<Hotkey>| async move {
         while let Some(hotkey) = rx.next().await {
             recording.set(false);
@@ -45,18 +45,17 @@ pub fn HotkeyPicker(mut picked_hotkey: Signal<Option<Hotkey>>) -> Element {
         }
     });
 
-    // Register/clear callback when recording state changes
     use_effect(move || {
-        let mut cb = recording_callback.lock().unwrap();
-        if recording() {
+        let callback = if recording() {
             let tx = hotkey_coroutine.tx();
-            let callback = Arc::new(move |hotkey: Hotkey| {
+            let cb: RecordRegisteredFn = Arc::new(move |hotkey: Hotkey| {
                 let _ = tx.unbounded_send(hotkey);
             });
-            *cb = Some(callback);
+            Some(cb)
         } else {
-            *cb = None;
-        }
+            None
+        };
+        record_registered.set(callback);
     });
 
     let label = if recording() {

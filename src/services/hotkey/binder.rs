@@ -1,13 +1,11 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
 use anyhow::anyhow;
 use dioxus::desktop::{ShortcutHandle, window};
 use global_hotkey::HotKeyState::Pressed;
 
+use super::record_registered::RecordRegistered;
 use crate::models::{Action, Hotkey};
-
-pub type RecordingCallback = Arc<Mutex<Option<Arc<dyn Fn(Hotkey) + Send + Sync>>>>;
 
 pub trait HotkeyBinder {
     fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> anyhow::Result<()>;
@@ -15,14 +13,14 @@ pub trait HotkeyBinder {
 }
 
 pub struct DioxusBinder {
-    recording_callback: RecordingCallback,
+    registered_record: RecordRegistered,
     handles: HashMap<Hotkey, ShortcutHandle>,
 }
 
 impl DioxusBinder {
-    pub fn new(recording_callback: RecordingCallback) -> Self {
+    pub fn new(registered_record: RecordRegistered) -> Self {
         Self {
-            recording_callback,
+            registered_record,
             handles: HashMap::new(),
         }
     }
@@ -31,12 +29,11 @@ impl DioxusBinder {
 impl HotkeyBinder for DioxusBinder {
     fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> anyhow::Result<()> {
         let my_action = action.clone();
-        let recording_callback = self.recording_callback.clone();
+        let my_record = self.registered_record.clone();
         let callback = move |state| {
             if state == Pressed {
-                let cb = recording_callback.lock().unwrap();
-                if let Some(picker_callback) = cb.as_ref() {
-                    picker_callback(hotkey);
+                if let Some(active_record) = my_record.get() {
+                    active_record(hotkey);
                 } else {
                     let _ = my_action.execute();
                 }
@@ -58,7 +55,7 @@ impl HotkeyBinder for DioxusBinder {
 
 #[cfg(test)]
 pub mod tests {
-    use std::sync::Mutex;
+    use std::sync::{Arc, Mutex};
 
     use super::*;
 
