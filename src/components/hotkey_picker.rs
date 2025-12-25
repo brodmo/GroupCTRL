@@ -66,25 +66,26 @@ fn record_unregistered(
 }
 
 fn use_record_registered(mut recording: Signal<bool>, mut picked_hotkey: Signal<Option<Hotkey>>) {
-    let record_registered = use_context::<SharedHotkeyCallback>();
-    let hotkey_coroutine = use_coroutine(move |mut rx: UnboundedReceiver<Hotkey>| async move {
-        while let Some(hotkey) = rx.next().await {
-            recording.set(false);
-            picked_hotkey.set(Some(hotkey));
-        }
-    });
+    let shared_record_callback = use_context::<SharedHotkeyCallback>();
+    let record_coroutine =
+        use_coroutine(move |mut receiver: UnboundedReceiver<Hotkey>| async move {
+            while let Some(hotkey) = receiver.next().await {
+                recording.set(false);
+                picked_hotkey.set(Some(hotkey));
+            }
+        });
     // This is called by the OS thread and therefore can't manipulate UI
     // Thus we need to send UI updates to a coroutine
     use_effect(move || {
-        let callback = if recording() {
-            let tx = hotkey_coroutine.tx();
-            let cb: HotkeyCallback = Arc::new(move |hotkey: Hotkey| {
-                let _ = tx.unbounded_send(hotkey);
+        let record_callback = if recording() {
+            let sender = record_coroutine.tx();
+            let send_to_coroutine: HotkeyCallback = Arc::new(move |hotkey: Hotkey| {
+                let _ = sender.unbounded_send(hotkey);
             });
-            Some(cb)
+            Some(send_to_coroutine)
         } else {
             None
         };
-        record_registered.set(callback);
+        shared_record_callback.set(record_callback);
     });
 }
