@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 
+use crate::models::Identifiable;
 use crate::util::capitalize;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -7,8 +8,14 @@ pub struct App {
     pub(super) bundle_id: String,
 }
 
+impl Identifiable<String> for App {
+    fn id(&self) -> String {
+        self.bundle_id.clone()
+    }
+}
+
 impl App {
-    fn display(&self) -> String {
+    pub fn display(&self) -> String {
         let name = self.bundle_id.split(".").last().unwrap_or(&self.bundle_id);
         capitalize(name)
     }

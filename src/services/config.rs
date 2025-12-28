@@ -1,4 +1,3 @@
-use dioxus::hooks::UnboundedSender;
 use uuid::Uuid;
 
 use crate::models::{Action, Config, Group, Hotkey};
@@ -22,15 +21,19 @@ impl ConfigService {
     }
 
     pub fn groups(&self) -> &Vec<Group> {
-        &self.config.groups()
+        self.config.groups()
     }
 
-    pub fn group_apps(&self, group_id: Uuid) -> &Vec<App> {
-        &self.config.group_apps(group_id)
+    pub fn group(&self, group_id: Uuid) -> &Group {
+        self.config.group(group_id)
     }
 
     pub fn add_group(&mut self, name: String) -> Uuid {
         self.config.add_group(name)
+    }
+
+    pub fn remove_group(&mut self, group_id: Uuid) {
+        self.config.remove_group(group_id)
     }
 
     pub fn set_name(&mut self, group_id: Uuid, name: String) {
@@ -41,11 +44,11 @@ impl ConfigService {
         self.config.add_app(group_id, app)
     }
 
-    pub fn remove_app(&mut self, group_id: Uuid, app: &App) {
-        self.config.remove_app(group_id, app)
+    pub fn remove_app(&mut self, group_id: Uuid, app_id: String) {
+        self.config.remove_app(group_id, app_id)
     }
 
-    fn set_hotkey(&mut self, group_id: Uuid, hotkey: Option<Hotkey>) -> Option<Action> {
+    pub fn set_hotkey(&mut self, group_id: Uuid, hotkey: Option<Hotkey>) -> Option<Action> {
         let (existing_hotkey, action) = self.config.get_binding(group_id);
         let conflict =
             self.hotkey_service

@@ -1,6 +1,4 @@
-use dioxus::hooks::UnboundedSender;
-
-use crate::models::{Action, Bindable, Config, Hotkey};
+use crate::models::{Action, Config, Hotkey};
 use crate::services::SharedSender;
 use crate::services::hotkey::binder::{DioxusBinder, HotkeyBinder};
 

@@ -3,29 +3,22 @@ use dioxus::prelude::*;
 use crate::os::{App, AppDialog, AppSelection};
 
 #[component]
-pub(super) fn AppSelector(mut selected_app: Signal<Option<App>>) -> Element {
+pub(super) fn AppSelector() -> Element {
+    let selection_sender = use_context::<UnboundedSender<App>>();
     let select_app = move |_| {
+        let my_sender = selection_sender.clone();
         spawn(async move {
             if let Ok(Some(app)) = AppDialog::select_app().await {
-                selected_app.set(Some(app));
+                let _ = my_sender.unbounded_send(app);
             }
         });
     };
 
-    let app_display = match selected_app() {
-        Some(app) => app.to_string(),
-        None => "No app selected".to_string(),
-    };
-
     rsx! {
-        div {
-            class: "flex gap-2 items-center",
-            button {
-                class: "btn btn-primary",
-                onclick: select_app,
-                "Pick App"
-            }
-            span { "{app_display}" }
+        button {
+            class: "btn btn-primary",
+            onclick: select_app,
+            "Pick App"
         }
     }
 }

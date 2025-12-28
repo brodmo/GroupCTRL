@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::models::Config;
+use crate::os::Openable;
 use crate::services::ConfigService;
 
 #[derive(Default)]
@@ -8,6 +8,10 @@ pub struct GroupService {}
 
 impl GroupService {
     pub fn open(&self, config_service: &ConfigService, group_id: Uuid) {
-        let apps = config_service.group_apps(group_id);
+        let apps = config_service.group(group_id).apps();
+        if let Some(app) = apps.iter().next() {
+            // TODO find current app and go next if in group
+            let _ = app.open();
+        }
     }
 }

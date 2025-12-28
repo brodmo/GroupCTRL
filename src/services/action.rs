@@ -1,4 +1,4 @@
-use crate::models::{Action, Config};
+use crate::models::Action;
 use crate::services::ConfigService;
 use crate::services::group::GroupService;
 

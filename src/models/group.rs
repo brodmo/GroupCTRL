@@ -3,14 +3,27 @@ use std::fmt::{Display, Formatter};
 use uuid::Uuid;
 
 use crate::models::Hotkey;
+use crate::models::traits::Identifiable;
 use crate::os::App;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Clone)]
 pub struct Group {
     id: Uuid,
     pub name: String,
     pub hotkey: Option<Hotkey>,
     apps: Vec<App>,
+}
+
+impl PartialEq for Group {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Identifiable<Uuid> for Group {
+    fn id(&self) -> Uuid {
+        self.id
+    }
 }
 
 impl Group {
@@ -23,11 +36,7 @@ impl Group {
         }
     }
 
-    pub fn id(&self) -> Uuid {
-        self.id
-    }
-
-    pub(super) fn apps(&self) -> &Vec<App> {
+    pub fn apps(&self) -> &Vec<App> {
         &self.apps
     }
 
@@ -35,8 +44,8 @@ impl Group {
         self.apps.push(app);
     }
 
-    pub(super) fn remove_app(&mut self, app: &App) {
-        self.apps.retain(|a| a != app)
+    pub(super) fn remove_app(&mut self, app_id: String) {
+        self.apps.retain(|a| a.id() != app_id)
     }
 }
 

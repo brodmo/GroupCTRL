@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use anyhow::anyhow;
 use dioxus::desktop::{ShortcutHandle, window};
-use dioxus::hooks::UnboundedSender;
 use global_hotkey::HotKeyState::Pressed;
 
 use super::sender::SharedSender;

@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::models::group::Group;
 use crate::models::hotkey::Hotkey;
-use crate::models::{Action, Bindable};
+use crate::models::{Action, Bindable, Identifiable};
 use crate::os::App;
 
 #[derive(Default)]
@@ -20,10 +20,6 @@ impl Config {
         &self.groups
     }
 
-    pub fn group_apps(&self, group_id: Uuid) -> &Vec<App> {
-        self.find_group(group_id).apps()
-    }
-
     pub fn add_group(&mut self, name: String) -> Uuid {
         let group = Group::new(name);
         let group_id = group.id();
@@ -31,36 +27,40 @@ impl Config {
         group_id
     }
 
-    fn find_group(&self, group_id: Uuid) -> &Group {
+    pub fn remove_group(&mut self, group_id: Uuid) {
+        self.groups.retain(|g| g.id() != group_id)
+    }
+
+    pub fn group(&self, group_id: Uuid) -> &Group {
         self.groups.iter().find(|g| g.id() == group_id).unwrap()
     }
 
-    fn find_group_mut(&mut self, group_id: Uuid) -> &mut Group {
+    fn group_mut(&mut self, group_id: Uuid) -> &mut Group {
         self.groups.iter_mut().find(|g| g.id() == group_id).unwrap()
     }
 
     pub fn set_name(&mut self, group_id: Uuid, name: String) {
-        let group = self.find_group_mut(group_id);
+        let group = self.group_mut(group_id);
         group.name = name;
     }
 
     pub fn add_app(&mut self, group_id: Uuid, app: App) {
-        let group = self.find_group_mut(group_id);
+        let group = self.group_mut(group_id);
         group.add_app(app)
     }
 
-    pub fn remove_app(&mut self, group_id: Uuid, app: &App) {
-        let group = self.find_group_mut(group_id);
-        group.remove_app(&app)
+    pub fn remove_app(&mut self, group_id: Uuid, app_id: String) {
+        let group = self.group_mut(group_id);
+        group.remove_app(app_id)
     }
 
     pub fn get_binding(&self, group_id: Uuid) -> (Option<Hotkey>, Action) {
-        let group = self.find_group(group_id);
+        let group = self.group(group_id);
         group.binding()
     }
 
     pub fn set_hotkey(&mut self, group_id: Uuid, hotkey: Option<Hotkey>) {
-        let group = self.find_group_mut(group_id);
+        let group = self.group_mut(group_id);
         group.hotkey = hotkey;
     }
 }

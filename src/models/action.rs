@@ -2,8 +2,8 @@ use std::fmt::{Display, Formatter};
 
 use uuid::Uuid;
 
-use crate::models::Hotkey;
 use crate::models::group::Group;
+use crate::models::{Hotkey, Identifiable};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Action {

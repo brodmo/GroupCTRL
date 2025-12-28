@@ -34,7 +34,7 @@ pub(super) fn HotkeyPicker(mut picked_hotkey: Signal<Option<Hotkey>>) -> Element
             button {
                 class: "btn btn-outline",
                 onclick: move |_| recording.set(true),
-                {label}
+                { label }
             }
         }
     }

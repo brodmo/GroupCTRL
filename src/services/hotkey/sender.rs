@@ -2,8 +2,6 @@ use std::sync::{Arc, Mutex};
 
 use dioxus::prelude::UnboundedSender;
 
-use crate::models::Hotkey;
-
 #[derive(Clone)]
 pub struct SharedSender<T>(Arc<Mutex<Option<UnboundedSender<T>>>>);
 

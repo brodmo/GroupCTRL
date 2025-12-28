@@ -1,10 +1,13 @@
+use std::collections::HashSet;
+
 use dioxus::prelude::*;
 use futures_util::StreamExt;
+use uuid::Uuid;
 
-use super::app_selector::AppSelector;
-use super::hotkey_picker::HotkeyPicker;
-use crate::models::{Action, Hotkey};
-use crate::os::App;
+use crate::components::group_config::GroupConfig;
+use crate::components::group_list::GroupList;
+use crate::components::list::CellChange;
+use crate::models::Action;
 use crate::services::{ActionService, ConfigService, SharedSender};
 
 #[component]
@@ -17,24 +20,54 @@ pub fn Root() -> Element {
     use_context_provider(|| registered_record_sender);
     use_context_provider(|| action_sender);
 
-    let picked_hotkey = use_signal(|| None::<Hotkey>);
-    let selected_app = use_signal(|| None::<App>);
-    use_effect(move || {
-        if let (Some(hotkey), Some(app)) = (picked_hotkey(), selected_app()) {
-            todo!();
-            // let action = Action::OpenGroup(app);
-            // let _ = hotkey_service.write().bind_hotkey(hotkey, action);
+    use_groups_list_change_handler(config_service);
+    let mut selected = use_signal(|| HashSet::<Uuid>::new());
+    let active_group = use_memo(move || {
+        let sel = selected.read();
+        if sel.len() == 1 {
+            sel.iter().next().copied()
+        } else {
+            None
         }
     });
 
     rsx! {
         div {
-            class: "flex gap-4 p-6 items-center justify-center h-screen",
+            class: "flex",
             style { "{include_str!(\"../../target/tailwind.css\")}" }
-            HotkeyPicker { picked_hotkey }
-            AppSelector { selected_app }
+            GroupList {
+                groups: config_service.read().groups().clone(),
+                selected
+            }
+            if let Some(group_id) = active_group() {
+                GroupConfig {
+                    config_service,
+                    group_id
+                }
+            }
         }
     }
+}
+
+fn use_groups_list_change_handler(mut config_service: Signal<ConfigService>) {
+    let handle_app_change = use_coroutine(
+        move |mut receiver: UnboundedReceiver<CellChange<Uuid>>| async move {
+            while let Some(cc) = receiver.next().await {
+                let mut cs = config_service.write();
+                match cc {
+                    CellChange::Add => {
+                        cs.add_group("New Group".to_string());
+                    }
+                    CellChange::Remove(groups) => {
+                        for group_id in groups {
+                            cs.remove_group(group_id)
+                        }
+                    }
+                }
+            }
+        },
+    );
+    use_context_provider(|| handle_app_change.tx()); // used in the list
 }
 
 fn use_action_listener(config_service: Signal<ConfigService>) -> UnboundedSender<Action> {
