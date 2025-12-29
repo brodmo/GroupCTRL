@@ -41,6 +41,7 @@ pub fn Root() -> Element {
             }
             if let Some(group_id) = active_group() {
                 GroupConfig {
+                    key: "{group_id}",
                     config_service,
                     group_id
                 }
