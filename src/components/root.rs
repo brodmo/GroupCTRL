@@ -33,17 +33,23 @@ pub fn Root() -> Element {
 
     rsx! {
         div {
-            class: "flex",
+            class: "flex h-screen",
             style { "{include_str!(\"../../target/tailwind.css\")}" }
-            GroupList {
-                groups: config_service.read().groups().clone(),
-                selected
+            aside {
+                class: "flex-1 p-2 border-r",
+                GroupList {
+                    groups: config_service.read().groups().clone(),
+                    selected
+                }
             }
-            if let Some(group_id) = active_group() {
-                GroupConfig {
-                    key: "{group_id}",
-                    config_service,
-                    group_id
+            main {
+                class: "flex-1 p-2",
+                if let Some(group_id) = active_group() {
+                    GroupConfig {
+                        key: "{group_id}",
+                        config_service,
+                        group_id
+                    }
                 }
             }
         }
