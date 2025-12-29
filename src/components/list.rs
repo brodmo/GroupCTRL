@@ -13,16 +13,14 @@ where
     E: ListCell<I> + Clone + PartialEq + 'static,
 {
     rsx! {
-        ul {
-            class: "menu",
-            for element in elements {
-                li {
+        div {
+            ul {
+                class: "menu",
+                for element in elements {
                     Cell { element, selected }
                 }
             }
-            li {
-                ListMenu { selected }
-            }
+            ListMenu { selected }
         }
     }
 }
@@ -44,7 +42,7 @@ where
     };
     rsx! {
         div {
-            class: "flex",
+            class: "flex gap-2",
             button {
                 class: "btn btn-outline",
                 onclick: add,
@@ -82,9 +80,8 @@ where
         }
     };
     rsx! {
-        a {
-            // TODO semantic styling
-            class: if is_selected { "active bg-base-300" } else { "" },
+        li {
+            class: if is_selected { "menu-active" } else { "" },
             onclick: toggle_active,
             { element.render() }
         }
