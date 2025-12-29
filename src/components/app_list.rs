@@ -9,7 +9,7 @@ use crate::os::App;
 
 #[component]
 pub fn AppList(apps: Vec<App>) -> Element {
-    let selected = use_signal(|| HashSet::<String>::new());
+    let selected = use_signal(HashSet::<String>::new);
 
     rsx! {
         div {

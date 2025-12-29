@@ -12,14 +12,7 @@ use crate::services::ConfigService;
 
 #[component]
 pub fn GroupConfig(config_service: Signal<ConfigService>, group_id: Uuid) -> Element {
-    let picked_hotkey = use_signal(|| {
-        config_service
-            .read()
-            .group(group_id)
-            .unwrap()
-            .hotkey
-            .clone()
-    });
+    let picked_hotkey = use_signal(|| config_service.read().group(group_id).unwrap().hotkey);
     use_effect(move || {
         let hotkey = *picked_hotkey.read();
         let mut service = config_service.write();
@@ -50,7 +43,7 @@ pub fn GroupConfig(config_service: Signal<ConfigService>, group_id: Uuid) -> Ele
 
     // TODO extract to group_name.rs
     let name = move || config_service.read().group(group_id).unwrap().name.clone();
-    let mut draft_name = use_signal(|| name());
+    let mut draft_name = use_signal(name);
     let mut input_handle = use_signal(|| None::<Rc<MountedData>>);
     let onkeydown = move |evt: KeyboardEvent| {
         match evt.key() {
@@ -58,7 +51,7 @@ pub fn GroupConfig(config_service: Signal<ConfigService>, group_id: Uuid) -> Ele
             Key::Escape => draft_name.set(name()),
             _ => return,
         }
-        let _ = input_handle.read().as_ref().unwrap().set_focus(false);
+        drop(input_handle.read().as_ref().unwrap().set_focus(false));
     };
     let onblur = move |_| draft_name.set(name());
     let apps = config_service

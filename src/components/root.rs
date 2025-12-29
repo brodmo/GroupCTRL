@@ -12,15 +12,15 @@ use crate::services::{ActionService, ConfigService, SharedSender};
 
 #[component]
 pub fn Root() -> Element {
-    let registered_record_sender = use_hook(|| SharedSender::new());
-    let action_sender = use_hook(|| SharedSender::new());
+    let registered_record_sender = use_hook(SharedSender::new);
+    let action_sender = use_hook(SharedSender::new);
     let config_service =
         use_signal(|| ConfigService::new(registered_record_sender.clone(), action_sender.clone()));
     action_sender.set(Some(use_action_listener(config_service)));
     use_context_provider(|| registered_record_sender);
     use_context_provider(|| action_sender);
 
-    let selected = use_signal(|| HashSet::<Uuid>::new());
+    let selected = use_signal(HashSet::<Uuid>::new);
     use_groups_list_change_listener(config_service, selected);
     let active_group = use_memo(move || {
         let sel = selected.read();
