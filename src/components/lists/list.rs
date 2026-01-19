@@ -16,7 +16,7 @@ where
     rsx! {
         div {
             class: "flex justify-between mb-1",
-            span { class: "font-bold text-sm", "{title}" }
+            span { class: "font-bold text-md ml-1", "{title}" }
             ListMenu { selected }
         }
         for element in elements {

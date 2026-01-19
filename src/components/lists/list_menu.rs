@@ -32,12 +32,12 @@ where
         div {
             class: "flex gap-1",
             button {
-                class: "btn btn-xs btn-square btn-outline",
+                class: "btn btn-xs btn-square",
                 onclick: add,
                 "+"
             }
             button {
-                class: "btn btn-xs btn-square btn-outline",
+                class: "btn btn-xs btn-square",
                 disabled: selected().is_empty(),
                 onclick: remove,
                 "-"

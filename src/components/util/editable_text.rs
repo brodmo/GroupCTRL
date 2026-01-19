@@ -17,7 +17,7 @@ pub fn EditableText(text: Signal<String>) -> Element {
     };
     rsx! {
         input {
-            class: "input input-ghost input-xs font-bold text-sm w-full",
+            class: "input input-ghost input-xs font-bold text-sm w-full p-1",
             value: "{draft}",
             onmounted: move |evt| input_handle.set(Some(evt.data())),
             oninput: move |evt| draft.set(evt.value()),
