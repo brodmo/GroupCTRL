@@ -8,7 +8,6 @@ fn main() {
     if let Ok(s) = status
         && !s.success()
     {
-        // TODO this doesn't seem to work
         panic!("Tailwind build failed. Ensure you've run 'npm install'.");
     }
 }

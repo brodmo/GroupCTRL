@@ -36,7 +36,6 @@ impl Config {
     }
 
     fn group_mut(&mut self, group_id: Uuid) -> &mut Group {
-        // TODO add better error handling
         self.groups.iter_mut().find(|g| g.id() == group_id).unwrap()
     }
 

@@ -43,7 +43,7 @@ impl<B: HotkeyBinder> HotkeyService<B> {
             self.binder.unbind_hotkey(ex_hk);
         }
         if let Some(hk) = hotkey {
-            self.binder.bind_hotkey(hk, &action).unwrap() // TODO handle error
+            self.binder.bind_hotkey(hk, &action).unwrap()
         }
         None
     }

@@ -31,7 +31,6 @@ where
 
     rsx! {
         button {
-            // TODO maybe daisy join buttons for styling
            class: format!(
                 "btn btn-sm w-full justify-start {}",
                 if is_selected() { "btn-active" } else { "btn-ghost" }

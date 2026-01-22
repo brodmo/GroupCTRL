@@ -14,7 +14,6 @@ impl Openable for App {
         let Some(app_url) = workspace.URLForApplicationWithBundleIdentifier(&bundle_id) else {
             bail!("Could not find app with bundle id '{bundle_id}'");
         };
-        // TODO use openApplicationAtUrl (requires async)
         if !workspace.openURL(&app_url) {
             bail!("syscall 'openURL' failed");
         }
