@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
-use anyhow::anyhow;
-use dioxus::desktop::{ShortcutHandle, window};
+use dioxus::desktop::{ShortcutHandle, ShortcutRegistryError, window};
 use global_hotkey::HotKeyState::Pressed;
 
 use super::sender::SharedSender;
 use crate::models::{Action, Hotkey};
+use crate::services::hotkey::error::HotkeyBindError;
 
 pub trait HotkeyBinder {
-    fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> anyhow::Result<()>;
+    fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> Result<(), HotkeyBindError>;
     fn unbind_hotkey(&mut self, hotkey: Hotkey);
 }
 
@@ -32,7 +32,7 @@ impl DioxusBinder {
 }
 
 impl HotkeyBinder for DioxusBinder {
-    fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> anyhow::Result<()> {
+    fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> Result<(), HotkeyBindError> {
         let my_recorded_register_sender = self.record_registered_sender.clone();
         let my_action_sender = self.action_sender.clone();
         let my_action = action.clone();
@@ -50,8 +50,10 @@ impl HotkeyBinder for DioxusBinder {
         };
         let handle = window()
             .create_shortcut(hotkey.0, callback)
-            // manual error mapping because this error doesn't implement Display
-            .map_err(|e| anyhow!("Failed to create shortcut: {:?}", e))?;
+            .map_err(|e| match e {
+                ShortcutRegistryError::InvalidShortcut(_) => HotkeyBindError::Invalid { hotkey },
+                _ => HotkeyBindError::Unknown { hotkey },
+            })?;
         self.handles.insert(hotkey, handle);
         Ok(())
     }
@@ -79,7 +81,7 @@ pub mod tests {
     }
 
     impl HotkeyBinder for MockBinder {
-        fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> anyhow::Result<()> {
+        fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> Result<(), HotkeyBindError> {
             let mut events = self.events.lock().unwrap();
             events.push(MockEvent::Register(hotkey, action.clone()));
             Ok(())

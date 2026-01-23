@@ -2,6 +2,7 @@ use uuid::Uuid;
 
 use crate::models::{Action, Config, Group, Hotkey};
 use crate::os::App;
+use crate::services::hotkey::HotkeyBindError;
 use crate::services::{HotkeyService, SharedSender};
 
 pub struct ConfigService {
@@ -48,14 +49,15 @@ impl ConfigService {
         self.config.remove_app(group_id, app_id)
     }
 
-    pub fn set_hotkey(&mut self, group_id: Uuid, hotkey: Option<Hotkey>) -> Option<Action> {
+    pub fn set_hotkey(
+        &mut self,
+        group_id: Uuid,
+        hotkey: Option<Hotkey>,
+    ) -> Result<(), HotkeyBindError> {
         let (existing_hotkey, action) = self.config.get_binding(group_id).unwrap();
-        let conflict =
-            self.hotkey_service
-                .bind_hotkey(&self.config, hotkey, existing_hotkey, action);
-        if conflict.is_none() {
-            self.config.set_hotkey(group_id, hotkey);
-        }
-        conflict
+        self.hotkey_service
+            .bind_hotkey(&self.config, hotkey, existing_hotkey, action)?;
+        self.config.set_hotkey(group_id, hotkey);
+        Ok(())
     }
 }

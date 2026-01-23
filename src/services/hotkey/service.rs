@@ -1,6 +1,7 @@
 use crate::models::{Action, Config, Hotkey};
 use crate::services::SharedSender;
 use crate::services::hotkey::binder::{DioxusBinder, HotkeyBinder};
+use crate::services::hotkey::error::HotkeyBindError;
 
 pub struct HotkeyService<B: HotkeyBinder = DioxusBinder> {
     binder: B,
@@ -18,11 +19,11 @@ impl HotkeyService<DioxusBinder> {
 }
 
 impl<B: HotkeyBinder> HotkeyService<B> {
-    fn find_conflict(config: &Config, hotkey: Option<Hotkey>) -> Option<Action> {
+    fn find_conflict(config: &Config, hotkey: Hotkey) -> Option<Action> {
         config
             .bindings()
             .into_iter()
-            .find_map(|(hk, a)| (hk == hotkey).then_some(a))
+            .find_map(|(hk, a)| (hk == Some(hotkey)).then_some(a))
     }
 
     pub fn bind_hotkey(
@@ -31,21 +32,26 @@ impl<B: HotkeyBinder> HotkeyService<B> {
         hotkey: Option<Hotkey>,
         existing_hotkey: Option<Hotkey>,
         action: Action,
-    ) -> Option<Action> {
+    ) -> Result<(), HotkeyBindError> {
         if hotkey == existing_hotkey {
-            return None;
+            return Ok(());
         }
-        if let Some(conflict) = Self::find_conflict(config, hotkey) {
-            return Some(conflict);
+        if let Some(hk) = hotkey
+            && let Some(conflict) = Self::find_conflict(config, hk)
+        {
+            return Err(HotkeyBindError::Conflict {
+                hotkey: hk,
+                conflict,
+            });
         }
 
         if let Some(ex_hk) = existing_hotkey {
             self.binder.unbind_hotkey(ex_hk);
         }
         if let Some(hk) = hotkey {
-            self.binder.bind_hotkey(hk, &action).unwrap()
+            self.binder.bind_hotkey(hk, &action)?
         }
-        None
+        Ok(())
     }
 }
 
@@ -93,7 +99,7 @@ mod tests {
         let result = service.bind_hotkey(&config, Some(hotkey), None, action.clone());
 
         // Assert
-        assert_eq!(result, None);
+        assert_eq!(result, Ok(()));
         assert_eq!(*events.lock().unwrap(), vec![Register(hotkey, action)]);
     }
 
@@ -108,7 +114,7 @@ mod tests {
         let result = service.bind_hotkey(&config, None, None, action.clone());
 
         // Assert
-        assert_eq!(result, None);
+        assert_eq!(result, Ok(()));
         assert_eq!(*events.lock().unwrap(), vec![]);
     }
 
@@ -124,7 +130,7 @@ mod tests {
         let result = service.bind_hotkey(&config, Some(hotkey), Some(hotkey), action.clone());
 
         // Assert
-        assert_eq!(result, None);
+        assert_eq!(result, Ok(()));
         assert_eq!(*events.lock().unwrap(), vec![]);
     }
 
@@ -142,7 +148,7 @@ mod tests {
             service.bind_hotkey(&config, Some(new_hotkey), Some(old_hotkey), action.clone());
 
         // Assert
-        assert_eq!(result, None);
+        assert_eq!(result, Ok(()));
         assert_eq!(
             *events.lock().unwrap(),
             vec![Unregister(old_hotkey), Register(new_hotkey, action)]
@@ -162,7 +168,13 @@ mod tests {
         let result = service.bind_hotkey(&config, Some(hotkey), None, new_action);
 
         // Assert
-        assert_eq!(result, Some(old_action.clone()));
+        assert_eq!(
+            result,
+            Err(HotkeyBindError::Conflict {
+                hotkey,
+                conflict: old_action.clone()
+            })
+        );
         assert_eq!(*events.lock().unwrap(), vec![]);
     }
 }
