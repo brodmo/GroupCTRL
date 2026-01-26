@@ -21,7 +21,7 @@ pub fn EditableText(
     let mut input_handle = use_signal(|| None::<Rc<MountedData>>);
     let set_focus = move |focus: bool| {
         if let Some(handle) = input_handle() {
-            drop(handle.set_focus(focus));
+            spawn(async move { drop(handle.set_focus(focus).await) });
         }
     };
     use_effect(move || {
@@ -60,8 +60,8 @@ pub fn EditableText(
             placeholder: "{placeholder}",
             onmounted: move |evt| input_handle.set(Some(evt.data())),
             oninput: move |evt| draft.set(evt.value()),
-            onblur,
             onkeydown,
+            onblur,
         }
     }
 }
