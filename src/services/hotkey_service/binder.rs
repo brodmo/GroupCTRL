@@ -70,7 +70,7 @@ impl HotkeyBinder for DioxusBinder {
 
 #[cfg(test)]
 pub mod tests {
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::Sender;
 
     use super::*;
 
@@ -81,19 +81,21 @@ pub mod tests {
     }
 
     pub struct MockBinder {
-        pub events: Arc<Mutex<Vec<MockEvent>>>,
+        pub event_sender: Sender<MockEvent>,
     }
 
     impl HotkeyBinder for MockBinder {
         fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> Result<(), HotkeyBindError> {
-            let mut events = self.events.lock().unwrap();
-            events.push(MockEvent::Register(hotkey, action.clone()));
+            self.event_sender
+                .send(MockEvent::Register(hotkey, action.clone()))
+                .unwrap();
             Ok(())
         }
 
         fn unbind_hotkey(&mut self, hotkey: Hotkey) {
-            let mut events = self.events.lock().unwrap();
-            events.push(MockEvent::Unregister(hotkey));
+            self.event_sender
+                .send(MockEvent::Unregister(hotkey))
+                .unwrap();
         }
     }
 }
