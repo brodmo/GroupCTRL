@@ -5,9 +5,9 @@ use uuid::Uuid;
 
 use crate::models::{Action, Config, Hotkey};
 use crate::os::App;
+use crate::services::HotkeyService;
 use crate::services::config_reader::ConfigReader;
 use crate::services::hotkey_service::HotkeyBindError;
-use crate::services::{HotkeyService, SharedSender};
 
 pub struct ConfigService {
     config: Arc<RwLock<Config>>,
@@ -17,16 +17,11 @@ pub struct ConfigService {
 impl ConfigService {
     pub fn new(
         config: Arc<RwLock<Config>>,
-        record_registered_sender: SharedSender<Hotkey>,
-        action_sender: UnboundedSender<Action>,
+        hotkey_sender: UnboundedSender<(Hotkey, Action)>,
     ) -> Self {
         Self {
             config: config.clone(),
-            hotkey_service: HotkeyService::new(
-                ConfigReader::new(config),
-                record_registered_sender,
-                action_sender,
-            ),
+            hotkey_service: HotkeyService::new(ConfigReader::new(config), hotkey_sender),
         }
     }
 

@@ -5,7 +5,6 @@ use dioxus::hooks::UnboundedSender;
 use global_hotkey::HotKeyState::Pressed;
 use log::warn;
 
-use super::sender::SharedSender;
 use crate::models::{Action, Hotkey};
 use crate::services::hotkey_service::error::HotkeyBindError;
 
@@ -15,19 +14,14 @@ pub trait HotkeyBinder {
 }
 
 pub struct DioxusBinder {
-    record_registered_sender: SharedSender<Hotkey>,
-    action_sender: UnboundedSender<Action>,
+    hotkey_sender: UnboundedSender<(Hotkey, Action)>,
     handles: HashMap<Hotkey, ShortcutHandle>,
 }
 
 impl DioxusBinder {
-    pub(super) fn new(
-        record_registered_sender: SharedSender<Hotkey>,
-        action_sender: UnboundedSender<Action>,
-    ) -> Self {
+    pub(super) fn new(hotkey_sender: UnboundedSender<(Hotkey, Action)>) -> Self {
         Self {
-            record_registered_sender,
-            action_sender,
+            hotkey_sender,
             handles: HashMap::new(),
         }
     }
@@ -35,18 +29,11 @@ impl DioxusBinder {
 
 impl HotkeyBinder for DioxusBinder {
     fn bind_hotkey(&mut self, hotkey: Hotkey, action: &Action) -> Result<(), HotkeyBindError> {
-        let my_recorded_register_sender = self.record_registered_sender.clone();
-        let my_action_sender = self.action_sender.clone();
+        let my_hotkey_sender = self.hotkey_sender.clone();
         let my_action = action.clone();
         let callback = move |state| {
             if state == Pressed {
-                // TODO send to input handler instead
-                // in hotkey picker (??) since recording is involved
-                if let Some(sender) = my_recorded_register_sender.get() {
-                    let _ = sender.unbounded_send(hotkey);
-                } else {
-                    let _ = my_action_sender.unbounded_send(my_action.clone());
-                }
+                let _ = my_hotkey_sender.unbounded_send((hotkey, my_action.clone()));
             }
         };
         let handle = window()

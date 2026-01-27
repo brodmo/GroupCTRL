@@ -8,27 +8,17 @@ use uuid::Uuid;
 use crate::components::group_config::GroupConfig;
 use crate::components::lists::{GroupList, ListOperation};
 use crate::components::util::spawn_listener;
-use crate::models::{Action, Config};
-use crate::services::{ActionService, ConfigReader, ConfigService, SharedSender};
+use crate::models::{Action, Config, Hotkey};
+use crate::services::{ActionService, ConfigReader, ConfigService};
 
 #[component]
 pub fn Root() -> Element {
+    use_effect(move || window().set_decorations(true));
+
     let config = Arc::new(RwLock::new(Config::default()));
     let config_reader = ConfigReader::new(config.clone());
-    spawn_action_listener(config_reader);
-    let action_sender = use_coroutine_handle::<Action>().tx();
-
-    let registered_record_sender = use_hook(SharedSender::new);
-    let config_service = use_signal(|| {
-        ConfigService::new(
-            config,
-            registered_record_sender.clone(),
-            action_sender.clone(),
-        )
-    });
-    use_context_provider(|| registered_record_sender);
-
-    use_effect(move || window().set_decorations(true));
+    let hotkey_sender = use_hotkey_listener(config_reader);
+    let config_service = use_signal(|| ConfigService::new(config, hotkey_sender));
 
     let selected = use_signal(HashSet::<Uuid>::new);
     let in_creation_group = use_signal(|| None::<Uuid>);
@@ -67,11 +57,18 @@ pub fn Root() -> Element {
     }
 }
 
-fn spawn_action_listener(config_reader: ConfigReader) {
+fn use_hotkey_listener(config_reader: ConfigReader) -> UnboundedSender<(Hotkey, Action)> {
+    let active_recorder = use_context_provider(|| Signal::new(None::<UnboundedSender<Hotkey>>));
     let mut action_service = ActionService::new(config_reader);
-    spawn_listener(EventHandler::new(move |action| {
-        action_service.execute(&action)
-    }))
+    spawn_listener(EventHandler::new(
+        move |(hotkey, action): (Hotkey, Action)| {
+            if let Some(sender) = active_recorder() {
+                let _ = sender.unbounded_send(hotkey);
+            } else {
+                action_service.execute(&action);
+            }
+        },
+    ))
 }
 
 fn use_group_list_listener(
@@ -95,5 +92,5 @@ fn use_group_list_listener(
                 }
             }
         },
-    ))
+    ));
 }

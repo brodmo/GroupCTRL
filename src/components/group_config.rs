@@ -82,5 +82,5 @@ fn use_app_list_listener(mut config_service: Signal<ConfigService>, group_id: Uu
                 }
             }
         },
-    ))
+    ));
 }

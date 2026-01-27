@@ -1,10 +1,9 @@
 use std::rc::Rc;
 
 use dioxus::prelude::*;
-use futures_util::StreamExt;
 
+use crate::components::util::spawn_listener;
 use crate::models::Hotkey;
-use crate::services::SharedSender;
 use crate::util::is_modifier;
 
 #[component]
@@ -79,18 +78,16 @@ fn record_unregistered(
 }
 
 fn use_record_registered(mut recording: Signal<bool>, set_hotkey: EventHandler<Option<Hotkey>>) {
-    let listener = use_coroutine(move |mut receiver: UnboundedReceiver<Hotkey>| async move {
-        while let Some(hotkey) = receiver.next().await {
-            set_hotkey.call(Some(hotkey));
-            recording.set(false);
-        }
-    });
-    let record_registered_sender = use_context::<SharedSender<Hotkey>>();
+    let mut active_recorder = use_context::<Signal<Option<UnboundedSender<Hotkey>>>>();
+    let recorder = spawn_listener(EventHandler::new(move |hotkey| {
+        set_hotkey.call(Some(hotkey));
+        recording.set(false);
+    }));
     use_effect(move || {
-        record_registered_sender.set(if !recording() {
-            None
+        active_recorder.set(if recording() {
+            Some(recorder.clone())
         } else {
-            Some(listener.tx())
-        });
+            None
+        })
     });
 }

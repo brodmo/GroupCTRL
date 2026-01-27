@@ -1,11 +1,9 @@
 mod binder;
 mod error;
-mod sender;
 
 use binder::{DioxusBinder, HotkeyBinder};
 use dioxus::hooks::UnboundedSender;
 pub use error::HotkeyBindError;
-pub use sender::SharedSender;
 
 use crate::models::{Action, Hotkey};
 use crate::services::config_reader::ConfigReader;
@@ -18,12 +16,11 @@ pub struct HotkeyService<B: HotkeyBinder = DioxusBinder> {
 impl HotkeyService<DioxusBinder> {
     pub fn new(
         config_reader: ConfigReader,
-        record_registered_sender: SharedSender<Hotkey>,
-        action_sender: UnboundedSender<Action>,
+        hotkey_sender: UnboundedSender<(Hotkey, Action)>,
     ) -> Self {
         Self {
             config_reader,
-            binder: DioxusBinder::new(record_registered_sender, action_sender),
+            binder: DioxusBinder::new(hotkey_sender),
         }
     }
 }
