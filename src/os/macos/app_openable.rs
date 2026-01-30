@@ -1,28 +1,49 @@
-use anyhow::bail;
+use anyhow::{Context, anyhow, bail};
+use block2::RcBlock;
+use futures::StreamExt;
 use log::info;
-use objc2_app_kit::NSWorkspace;
-use objc2_foundation::NSString;
+use objc2_app_kit::{NSWorkspace, NSWorkspaceOpenConfiguration};
+use objc2_foundation::{NSError, NSString};
 
 use super::app::App;
 use crate::os::Openable;
 
 impl Openable for App {
-    fn open(&self) -> anyhow::Result<()> {
-        info!("Opening app {self}");
+    async fn open(&self) -> anyhow::Result<()> {
+        info!("opening app {self}");
         let workspace = NSWorkspace::sharedWorkspace();
         let bundle_id = NSString::from_str(&self.bundle_id);
         let Some(app_url) = workspace.URLForApplicationWithBundleIdentifier(&bundle_id) else {
-            bail!("Could not find app with bundle id '{bundle_id}'");
+            bail!("could not find app with bundle id '{}'", self.bundle_id);
         };
-        if !workspace.openURL(&app_url) {
-            bail!("syscall 'openURL' failed");
-        }
-        Ok(())
+        let (tx, mut rx) = futures::channel::mpsc::unbounded();
+        let app_path = app_url.path().context("app URL is missing path")?;
+        let handler = RcBlock::new(move |_app, error: *mut NSError| {
+            let _ = tx.unbounded_send(if error.is_null() {
+                Ok(())
+            } else {
+                Err(anyhow!(
+                    "could not open app at path '{}': {}",
+                    app_path,
+                    unsafe { &*error }
+                ))
+            });
+        });
+        workspace.openApplicationAtURL_configuration_completionHandler(
+            &app_url,
+            &NSWorkspaceOpenConfiguration::configuration(),
+            Some(&handler),
+        );
+        rx.next()
+            .await
+            .context("openApplicationAtUrl completion handler was discarded")?
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use futures::executor::block_on;
+
     use super::*;
     use crate::os::{AppQuery, System};
 
@@ -32,10 +53,9 @@ mod tests {
         let app = App {
             bundle_id: "com.apple.finder".to_string(),
         };
-        // This only means the command was received, but should be fine
-        assert!(app.open().is_ok());
+        assert!(block_on(app.open()).is_ok());
         if let Ok(Some(restore)) = initial_app {
-            restore.open().unwrap();
+            block_on(restore.open()).unwrap();
         }
     }
 
@@ -44,6 +64,10 @@ mod tests {
         let fake_app = App {
             bundle_id: "com.test.fake".to_string(),
         };
-        assert!(fake_app.open().is_err());
+        let result = block_on(fake_app.open());
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "could not find app with bundle id 'com.test.fake'"
+        );
     }
 }

@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock, RwLockReadGuard};
 
 use crate::models::Config;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ConfigReader(Arc<RwLock<Config>>);
 
 impl ConfigReader {

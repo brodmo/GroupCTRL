@@ -4,6 +4,7 @@ use uuid::Uuid;
 use crate::os::{App, AppQuery, Openable, System};
 use crate::services::ConfigReader;
 
+#[derive(Clone)]
 pub struct GroupService {
     config_reader: ConfigReader,
 }
@@ -13,7 +14,7 @@ impl GroupService {
         Self { config_reader }
     }
 
-    pub fn open(&self, group_id: Uuid) {
+    pub async fn open(&self, group_id: Uuid) {
         let apps = self
             .config_reader
             .read()
@@ -25,14 +26,14 @@ impl GroupService {
             && let Some(pos) = apps.iter().position(|app| app == &current)
         {
             let next_pos = (pos + 1) % apps.len();
-            Self::open_app(&apps[next_pos]);
+            Self::open_app(&apps[next_pos]).await;
         } else if let Some(app) = apps.first() {
-            Self::open_app(app);
+            Self::open_app(app).await;
         }
     }
 
-    fn open_app(app: &App) {
-        let result = app.open();
+    async fn open_app(app: &App) {
+        let result = app.open().await;
         if let Err(error) = result {
             // This can fail because the app was uninstalled, etc
             error!(

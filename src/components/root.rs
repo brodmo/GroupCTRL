@@ -57,14 +57,17 @@ pub fn Root() -> Element {
 fn use_config_service() -> Signal<ConfigService> {
     let config = Arc::new(RwLock::new(Config::default()));
     let config_reader = ConfigReader::new(config.clone());
-    let mut action_service = ActionService::new(config_reader);
+    let action_service = ActionService::new(config_reader);
 
     let active_recorder = use_context_provider(|| Signal::new(None::<UnboundedSender<Hotkey>>));
     let hotkey_sender = use_listener(Callback::new(move |(hotkey, action)| {
         if let Some(sender) = active_recorder() {
             sender.unbounded_send(hotkey).unwrap();
         } else {
-            action_service.execute(&action);
+            let service = action_service.clone();
+            spawn(async move {
+                service.execute(&action).await;
+            });
         }
     }));
 

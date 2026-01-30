@@ -16,5 +16,5 @@ pub trait AppSelection {
 }
 
 pub trait Openable {
-    fn open(&self) -> anyhow::Result<()>;
+    async fn open(&self) -> anyhow::Result<()>;
 }

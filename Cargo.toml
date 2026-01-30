@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+futures = "0.3.31"
 global-hotkey = "0.7.0"
 anyhow = "1.0.100"
 log = "0.4.29"
@@ -17,8 +18,9 @@ thiserror = "2.0.18"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6.3"
-objc2-foundation = { version = "0.3.2", features = ["NSString", "NSURL"] }
-objc2-app-kit = { version = "0.3.2", features = ["NSWorkspace", "NSApplication", "NSResponder"] }
+block2 = "0.6.2"
+objc2-foundation = { version = "0.3.2", features = ["NSString", "NSURL", "NSError"] }
+objc2-app-kit = { version = "0.3.2", features = ["NSWorkspace", "NSApplication", "NSResponder", "NSRunningApplication"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows = { version = "0.62.2", features = ["Win32", "Win32_UI", "Win32_UI_WindowsAndMessaging", "Win32_System", "Win32_System_Threading"] }
