@@ -15,7 +15,12 @@ fn main() {
 }
 
 fn npm(args: &[&str]) {
-    let output = Command::new("npm")
+    let npm_cmd = if cfg!(target_os = "windows") {
+        "npm.cmd"
+    } else {
+        "npm"
+    };
+    let output = Command::new(npm_cmd)
         .args(args)
         .output()
         .map_err(|e| {
@@ -26,7 +31,6 @@ fn npm(args: &[&str]) {
             )
         })
         .unwrap();
-
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         panic!("command 'npm {}' failed:\n{}", args.join(" "), stderr);

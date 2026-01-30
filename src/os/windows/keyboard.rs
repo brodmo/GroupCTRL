@@ -2,8 +2,6 @@ use global_hotkey::hotkey::Modifiers;
 
 use crate::os::{KeyboardBehavior, System};
 
-pub struct Keyboard;
-
 impl KeyboardBehavior for System {
     fn modifier_format() -> [(Modifiers, &'static str); 4] {
         [
