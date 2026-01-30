@@ -16,7 +16,7 @@ impl EditActions for System {
                 app.sendAction_to_from(sel!(selectAll:), None, None);
             }
         } else {
-            log::warn!("Could not get MainThreadMarker for Select All action");
+            log::warn!("could not get MainThreadMarker for Select All action");
         }
     }
 }

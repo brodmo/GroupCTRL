@@ -12,4 +12,4 @@ mod windows;
 pub use windows::*;
 
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-compile_error!("This application only supports macOS and Windows");
+compile_error!("GroupCTRL only supports macOS and Windows");

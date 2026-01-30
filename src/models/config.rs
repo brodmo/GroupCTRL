@@ -36,14 +36,14 @@ impl Config {
         self.groups
             .iter()
             .find(|g| g.id() == group_id)
-            .with_context(|| format!("Group {} not found", group_id))
+            .with_context(|| format!("group {} not found", group_id))
     }
 
     fn group_mut(&mut self, group_id: Uuid) -> anyhow::Result<&mut Group> {
         self.groups
             .iter_mut()
             .find(|g| g.id() == group_id)
-            .with_context(|| format!("Group {} not found (mut)", group_id))
+            .with_context(|| format!("group {} not found (mut)", group_id))
     }
 
     pub fn set_name(&mut self, group_id: Uuid, name: String) -> anyhow::Result<()> {
