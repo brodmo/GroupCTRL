@@ -2,5 +2,9 @@
 
 ## Development
 
-- npm install .
-- dx serve & npm run watch for hot reload (macOS only)
+- Requires `npm`
+- `cargo run`
+
+### Hot reload (macOS only)
+- One-time: `cargo install dioxus-cli`
+- `dx serve` & `npm run watch`
