@@ -16,22 +16,16 @@ const MAX_HISTORY: usize = 1024; // Prevent potential memory leak
 pub struct GroupService {
     config_reader: ConfigReader,
     history: Arc<RwLock<VecDeque<String>>>,
-    on_app_open: Rc<dyn Fn(Uuid)>,
     on_no_app_to_open: Rc<dyn Fn(Group)>,
 }
 
 impl GroupService {
-    pub fn new(
-        config_reader: ConfigReader,
-        on_app_open: Rc<dyn Fn(Uuid)>,
-        on_no_app_to_open: Rc<dyn Fn(Group)>,
-    ) -> Self {
+    pub fn new(config_reader: ConfigReader, on_no_app_to_open: Rc<dyn Fn(Group)>) -> Self {
         let history = Arc::new(RwLock::new(VecDeque::new()));
         Self::spawn_history_writer(history.clone());
         Self {
             config_reader,
             history,
-            on_app_open,
             on_no_app_to_open,
         }
     }
@@ -66,7 +60,6 @@ impl GroupService {
             .filter(|app| current != Some(app.id()))
         {
             Self::open_app(&app).await;
-            (self.on_app_open)(group_id);
         } else {
             (self.on_no_app_to_open)(group);
         }
