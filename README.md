@@ -1,3 +1,8 @@
+> [!WARNING]
+> **Development of GroupCtrl has been discontinued**. No further updates or bug fixes are planned. \
+> I've moved to [Hammerspoon](https://www.hammerspoon.org/) for app switching, you can check out my config [here](https://github.com/brodmo/dotfiles/blob/main/home/.hammerspoon/init.lua).
+> See [below](#Alternatives) for other alternatives.
+
 <h1>
   <sub><img src="assets/icons/icon.svg" width="35" alt="GroupCtrl icon" /></sub>
   GroupCtrl
